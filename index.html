@@ -2340,23 +2340,26 @@ function downloadDoc(filename, content) {
 }
 // ─── PREMIUM ACCESS ──────────────────────────────────────────────────────────
 function activatePremium() {
+  const country = currentCountry || 'de';
   const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
-  localStorage.setItem('premium_expiry', expiry);
+  localStorage.setItem('premium_expiry_' + country, expiry);
   applyPremiumUI();
 }
 
 function checkPremium() {
-  const expiry = localStorage.getItem('premium_expiry');
+  const country = currentCountry || 'de';
+  const expiry = localStorage.getItem('premium_expiry_' + country);
   if (!expiry) return false;
   if (Date.now() > parseInt(expiry)) {
-    localStorage.removeItem('premium_expiry');
+    localStorage.removeItem('premium_expiry_' + country);
     return false;
   }
   return true;
 }
 
 function daysLeft() {
-  const expiry = localStorage.getItem('premium_expiry');
+  const country = currentCountry || 'de';
+  const expiry = localStorage.getItem('premium_expiry_' + country);
   if (!expiry) return 0;
   return Math.ceil((parseInt(expiry) - Date.now()) / (24 * 60 * 60 * 1000));
 }
@@ -2364,20 +2367,21 @@ function daysLeft() {
 function applyPremiumUI() {
   const badge = document.getElementById('premium-badge');
   const isPremium = checkPremium();
+  // First remove unlocked from all cards
+  document.querySelectorAll('.card').forEach(card => {
+    card.classList.remove('unlocked');
+  });
   if (isPremium) {
     document.getElementById('days-left').textContent = daysLeft();
     badge.style.display = 'flex';
-    // Add unlocked class to all premium cards — CSS handles the rest
-    document.querySelectorAll('.card').forEach(card => {
+    // Unlock only cards of current country
+    document.querySelectorAll('.card[data-country="' + currentCountry + '"]').forEach(card => {
       if (card.querySelector('.lock-overlay')) {
         card.classList.add('unlocked');
       }
     });
   } else {
     badge.style.display = 'none';
-    document.querySelectorAll('.card').forEach(card => {
-      card.classList.remove('unlocked');
-    });
   }
 }
 
