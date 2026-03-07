@@ -1919,6 +1919,95 @@ Return ONLY the filled document text, no explanations.`,
   }
 }
 
+async function aiGeneratePremiumDoc(docId) {
+  const btn = document.getElementById('ai-gen-btn');
+  const loading = document.getElementById('ai-loading');
+  const dlBtn = document.getElementById('download-premium-btn-' + docId);
+
+  const fields = {};
+  document.querySelectorAll('[id^="ai_"]').forEach(el => {
+    fields[el.id.replace('ai_', '')] = el.value.trim();
+  });
+
+  if (!fields.name) {
+    alert('Пожалуйста, введите хотя бы ваше имя.');
+    return;
+  }
+
+  btn.disabled = true;
+  loading.style.display = 'flex';
+
+  const userInfo = Object.entries(fields)
+    .filter(([,v]) => v)
+    .map(([k,v]) => `${k}: ${v}`)
+    .join('\n');
+
+  // Strip HTML tags from premium doc content for the template
+  const rawContent = (premiumDocs[docId] || '').replace(/<[^>]+>/g, '').replace(/\n{3,}/g, '\n\n').trim();
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: `You are a document assistant. Fill in the template document by replacing ALL placeholder fields in [brackets] with the user's provided information.
+Keep the document structure, headings, and German/Polish language intact.
+If some info is missing, use reasonable placeholders like [bitte ausfüllen].
+Return ONLY the filled document text, preserving section headers and structure. No extra explanations.`,
+        messages: [{
+          role: 'user',
+          content: `Fill this document template with the following user information:\n\n${userInfo}\n\nTemplate:\n${rawContent}`
+        }]
+      })
+    });
+
+    const data = await response.json();
+    const filled = data.content?.[0]?.text || rawContent;
+
+    // Update download to use AI-filled content
+    if (dlBtn) {
+      dlBtn.onclick = () => downloadFilledPremiumDoc(docId, filled);
+      dlBtn.textContent = '⬇ Скачать заполненный документ (.html)';
+    }
+
+    btn.textContent = '✅ Готово! Можно скачивать';
+    btn.style.background = '#4A8C5C';
+  } catch(e) {
+    btn.textContent = '⚠ Ошибка. Попробуйте ещё раз';
+    btn.disabled = false;
+  } finally {
+    loading.style.display = 'none';
+  }
+}
+
+function downloadFilledPremiumDoc(docId, filledText) {
+  const bom = '\uFEFF';
+  const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.9; margin: 2rem 1.5rem; color: #111; max-width: 700px; }
+  pre { white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }
+  h2 { font-size: 16px; margin-top: 2em; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+  hr { border: none; border-top: 2px solid #333; margin: 2em 0; }
+</style>
+</head>
+<body><pre>${filledText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></body>
+</html>`;
+  const blob = new Blob([bom + htmlContent], { type: 'text/html;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = (premiumFilenames[docId] || docId) + '_filled.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // ─── FILTER ──────────────────────────────────────────────────────────────────
 function filter(cat, btn) {
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -2674,7 +2763,15 @@ function openModal(id) {
   const content = document.getElementById('modal-content');
 
   if (d.premium && checkPremium()) {
-    // Premium active — show download directly
+    // Premium active — show AI fill + download
+    const premContent = premiumDocs[id];
+    const fields = getAiFields(id);
+    const fieldsHtml = fields.map(f => `
+      <div class="ai-field">
+        <label>${f.label}</label>
+        <input type="text" id="ai_${f.key}" placeholder="${f.placeholder}" />
+      </div>
+    `).join('');
     content.innerHTML = `
       <div class="modal-header">
         <div class="modal-title">${d.title}</div>
@@ -2684,7 +2781,18 @@ function openModal(id) {
         <p style="color:#1a7a3f;font-weight:600;">✓ Premium активен · ${daysLeft()} дн. осталось</p>
         <p>${d.desc}</p>
       </div>
-      <button class="btn-gold" onclick="downloadPremiumDoc('${id}')">⬇ Скачать документ (.html)</button>
+      <div class="ai-panel">
+        <div class="ai-panel-title"><span class="ai-sparkle">✨</span> AI-заполнение документа</div>
+        <div class="ai-fields-grid">${fieldsHtml}</div>
+        <button class="ai-generate-btn" id="ai-gen-btn" onclick="aiGeneratePremiumDoc('${id}')">
+          ✨ Заполнить документ с AI
+        </button>
+        <div id="ai-loading" style="display:none;" class="ai-loading">
+          <div class="ai-dots"><span></span><span></span><span></span></div>
+          AI заполняет документ...
+        </div>
+      </div>
+      <button class="btn-gold" id="download-premium-btn-${id}" onclick="downloadPremiumDoc('${id}')">⬇ Скачать документ (.html)</button>
       <button class="btn-outline" onclick="closeModal()">Закрыть</button>
     `;
   } else if (d.premium) {
@@ -2698,7 +2806,8 @@ function openModal(id) {
             activatePremium();
             document.getElementById('paypal-container-S4SGBX8A7M3AC').style.display = 'none';
             document.getElementById('paypal-success-msg').style.display = 'block';
-            setTimeout(() => downloadPremiumDoc(id), 800);
+            // After payment — reopen modal with AI panel
+            setTimeout(() => { closeModal(); openModal(id); }, 1200);
           }
         }).render("#paypal-container-S4SGBX8A7M3AC");
       }
