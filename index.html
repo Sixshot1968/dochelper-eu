@@ -306,6 +306,43 @@
   }
   .card:hover .arrow-btn { border-color: var(--gold); color: var(--gold); }
 
+  /* AI badge on card */
+  .ai-card-badge {
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #7c5cbf;
+    background: #f0ebff;
+    border: 1px solid rgba(124,92,191,0.25);
+    padding: 2px 8px;
+    border-radius: 100px;
+    position: relative;
+    cursor: default;
+  }
+  .ai-card-badge::before { content: '✨ '; }
+  .ai-card-badge::after {
+    content: 'Автозаполнение с AI';
+    position: absolute;
+    bottom: calc(100% + 7px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 7px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    border: 1px solid rgba(124,92,191,0.3);
+  }
+  .ai-card-badge:hover::after { opacity: 1; }
+
   /* Lock overlay for premium */
   .lock-overlay {
     position: absolute;
@@ -2825,6 +2862,14 @@ window.addEventListener('DOMContentLoaded', () => {
   applyPremiumUI();
   // Set correct badge for default country (de)
   document.getElementById('country-badge').innerHTML = '🇩🇪 ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги');
+  // Add AI badge to all card footers
+  document.querySelectorAll('.card .card-footer').forEach(footer => {
+    const badge = document.createElement('span');
+    badge.title = 'Автозаполнение с AI — просто введите свои данные';
+    badge.textContent = 'AI';
+    const arrow = footer.querySelector('.arrow-btn');
+    if (arrow) footer.insertBefore(badge, arrow);
+  });
 });
 
 // ─── REVIEWS ─────────────────────────────────────────────────────────────────
