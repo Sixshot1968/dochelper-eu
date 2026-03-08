@@ -2065,30 +2065,6 @@ function downloadDocAsPdf(filename, text) {
 function downloadDoc(filename, text) {
   downloadDocAsPdf(filename, text);
 }
-  const bom = '\uFEFF';
-  const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<style>
-  body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.9; margin: 2rem 1.5rem; color: #111; max-width: 700px; }
-  pre { white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }
-  h2 { font-size: 16px; margin-top: 2em; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
-  hr { border: none; border-top: 2px solid #333; margin: 2em 0; }
-</style>
-</head>
-<body><pre>${filledText.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre></body>
-</html>`;
-  const blob = new Blob([bom + htmlContent], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = (premiumFilenames[docId] || docId) + '_filled.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 
 // ─── FILTER ──────────────────────────────────────────────────────────────────
 function filter(cat, btn) {
@@ -2764,31 +2740,6 @@ function closeModal(e) {
 }
 
 // ─── DOWNLOAD ────────────────────────────────────────────────────────────────
-function downloadDoc(filename, content) {
-  const bom = '\uFEFF';
-  const htmlContent = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>
-  body { font-family: Arial, sans-serif; font-size: 14px; line-height: 1.9; margin: 2rem 1.5rem; color: #111; max-width: 700px; }
-  pre { white-space: pre-wrap; font-family: Arial, sans-serif; font-size: 14px; }
-</style>
-</head>
-<body><pre>${content}</pre></body>
-</html>`;
-
-  const blob = new Blob([bom + htmlContent], { type: 'text/html;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = filename + '.html';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 // ─── PREMIUM ACCESS ──────────────────────────────────────────────────────────
 function activatePremium() {
   const country = currentCountry || 'de';
