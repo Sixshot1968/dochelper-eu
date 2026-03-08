@@ -1057,7 +1057,7 @@
       <button class="lang-btn active" onclick="setLang('ru')">РУС</button>
       <button class="lang-btn" onclick="setLang('uk')">УКР</button>
     </div>
-    <div class="header-badge" id="country-badge">🇩🇪 <span data-i18n="headerBadge">Документы & Услуги</span></div>
+    <div class="header-badge" id="country-badge"><span data-i18n="headerBadge">Документы & Услуги</span></div>
   </div>
 </header>
 
@@ -2713,8 +2713,7 @@ function setCountry(country) {
     card.style.display = cardCountry === country ? '' : 'none';
   });
   // Update header badge
-  const flag = country === 'de' ? '🇩🇪' : '🇵🇱';
-  document.getElementById('country-badge').innerHTML = flag + ' ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги');
+  document.getElementById('country-badge').innerHTML = currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги';
   // Update subtitle
   const sub = document.querySelector('.section-sub');
   if (sub) sub.textContent = country === 'pl'
@@ -2854,7 +2853,7 @@ function openModal(id) {
 window.addEventListener('DOMContentLoaded', () => {
   applyPremiumUI();
   // Set correct badge for default country (de)
-  document.getElementById('country-badge').innerHTML = '🇩🇪 ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги');
+  document.getElementById('country-badge').innerHTML = currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги';
   // Add AI badge to all card footers
   document.querySelectorAll('.card .card-footer').forEach(footer => {
     const badge = document.createElement('span');
