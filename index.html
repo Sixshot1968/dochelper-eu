@@ -2713,9 +2713,8 @@ function setCountry(country) {
     card.style.display = cardCountry === country ? '' : 'none';
   });
   // Update header badge
-  document.getElementById('country-badge').innerHTML = country === 'de'
-    ? '🇩🇪 ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги')
-    : '🇵🇱 ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги');
+  const flag = country === 'de' ? '🇩🇪' : '🇵🇱';
+  document.getElementById('country-badge').innerHTML = flag + ' ' + (currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги');
   // Update subtitle
   const sub = document.querySelector('.section-sub');
   if (sub) sub.textContent = country === 'pl'
