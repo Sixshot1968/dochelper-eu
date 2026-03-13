@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1054,8 +1054,8 @@
       <button class="country-btn" onclick="setCountry('pl')">PL</button>
     </div>
     <div class="lang-switcher">
-      <button class="lang-btn active" onclick="setLang('ru')">РУС</button>
-      <button class="lang-btn" onclick="setLang('uk')">УКР</button>
+      <button class="lang-btn" onclick="setLang('ru')">РУС</button>
+      <button class="lang-btn active" onclick="setLang('uk')">УКР</button>
     </div>
     <div class="header-badge" id="country-badge"><span data-i18n="headerBadge">Документы & Услуги</span></div>
   </div>
@@ -2900,8 +2900,23 @@ function openModal(id) {
 // Init on page load
 window.addEventListener('DOMContentLoaded', () => {
   applyPremiumUI();
+  // Apply default language (uk)
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n['uk'][key]) el.textContent = i18n['uk'][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (i18n['uk'][key]) el.placeholder = i18n['uk'][key];
+  });
+  document.querySelectorAll('[data-i18n-art]').forEach(el => {
+    const key = el.getAttribute('data-i18n-art');
+    if (i18n['uk'][key]) el.textContent = i18n['uk'][key];
+  });
+  updateFaqLang('uk');
+  document.title = 'DocHelper — Документи для життя в ЄС';
   // Set correct badge for default country (de)
-  document.getElementById('country-badge').innerHTML = currentLang === 'ru' ? 'Документы & Услуги' : 'Документи & Послуги';
+  document.getElementById('country-badge').innerHTML = 'Документи & Послуги';
   // Add AI badge to all card footers
   document.querySelectorAll('.card .card-footer').forEach(footer => {
     const badge = document.createElement('span');
@@ -4222,7 +4237,7 @@ const i18n = {
   }
 };
 
-let currentLang = 'ru';
+let currentLang = 'uk';
 
 // ─── FAQ TRANSLATIONS ────────────────────────────────────────────────────────
 const faqTranslations = {
