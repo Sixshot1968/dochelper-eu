@@ -51,7 +51,7 @@
 <!-- PWA -->
 <meta name="application-name" content="DocHelper">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="DocHelper">
 <meta name="theme-color" content="#111111">
 <meta name="description" content="Документы для жизни в ЕС">
@@ -4097,23 +4097,18 @@ function fbToggleChip(el) {
   el.classList.toggle('selected');
 }
 
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyrr6AOInmQ743t6j9jgfe-71gVUoduWQm-S8Mi3zOv1Wm179kgXOy3rIqNUkkLnYB4/exec';
-
 function submitFeedback() {
   const text = document.getElementById('fb-text').value.trim();
   const chips = [...document.querySelectorAll('.fb-chip.selected')].map(c => c.textContent);
-  const feedback = { stars: fbStarVal, chips: chips.join(', '), text, lang: currentLang };
+  const feedback = { stars: fbStarVal, chips, text, date: new Date().toLocaleDateString('ru-RU') };
   // Save to localStorage
   const all = JSON.parse(localStorage.getItem('dochelper_feedback') || '[]');
-  all.push({...feedback, date: new Date().toLocaleDateString('ru-RU')});
+  all.push(feedback);
   localStorage.setItem('dochelper_feedback', JSON.stringify(all));
-  // Send to Google Sheets
-  fetch(SHEETS_URL, {
-    method: 'POST',
-    mode: 'no-cors',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(feedback)
-  }).catch(err => console.log('Sheets error:', err));
+  // Telegram notification
+  const chipsText = chips.length ? chips.join(', ') : 'не выбрано';
+  const starsText = fbStarVal ? '⭐'.repeat(fbStarVal) : 'не указано';
+  sendToTelegram(`💬 <b>Новое пожелание на DocHelper!</b>\n${starsText}\n🏷 Хочет видеть: ${chipsText}\n✏️ ${text || 'без текста'}\n📅 ${new Date().toLocaleDateString('ru-RU')}`);
   // Show success
   document.getElementById('feedback-wrap').querySelector('.feedback-header').style.display = 'none';
   document.querySelectorAll('.feedback-step').forEach(s => s.style.display = 'none');
