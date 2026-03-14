@@ -6,7 +6,6 @@
 <title>DocHelper — Документы для жизни в ЕС | Германия, Польша</title>
 
 <meta name="google-site-verification" content="Li8lFj14iSrl0ihYbjmgZK53fCQ-TUWK2EdM8dqodso">
-<meta name="google-site-verification" content="69WsPAMh23gZJS0bCtuQt6Ir07j6SjUV2X1spWpk6RY">
 
 <!-- SEO -->
 <meta name="description" content="DocHelper — готовые шаблоны документов для жизни в Германии и Польше на русском и украинском языках. Письма арендодателю, заявления в Jobcenter, Karta Pobytu и многое другое.">
@@ -4098,18 +4097,23 @@ function fbToggleChip(el) {
   el.classList.toggle('selected');
 }
 
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyrr6AOInmQ743t6j9jgfe-71gVUoduWQm-S8Mi3zOv1Wm179kgXOy3rIqNUkkLnYB4/exec';
+
 function submitFeedback() {
   const text = document.getElementById('fb-text').value.trim();
   const chips = [...document.querySelectorAll('.fb-chip.selected')].map(c => c.textContent);
-  const feedback = { stars: fbStarVal, chips, text, date: new Date().toLocaleDateString('ru-RU') };
+  const feedback = { stars: fbStarVal, chips: chips.join(', '), text, lang: currentLang };
   // Save to localStorage
   const all = JSON.parse(localStorage.getItem('dochelper_feedback') || '[]');
-  all.push(feedback);
+  all.push({...feedback, date: new Date().toLocaleDateString('ru-RU')});
   localStorage.setItem('dochelper_feedback', JSON.stringify(all));
-  // Telegram notification
-  const chipsText = chips.length ? chips.join(', ') : 'не выбрано';
-  const starsText = fbStarVal ? '⭐'.repeat(fbStarVal) : 'не указано';
-  sendToTelegram(`💬 <b>Новое пожелание на DocHelper!</b>\n${starsText}\n🏷 Хочет видеть: ${chipsText}\n✏️ ${text || 'без текста'}\n📅 ${new Date().toLocaleDateString('ru-RU')}`);
+  // Send to Google Sheets
+  fetch(SHEETS_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(feedback)
+  }).catch(err => console.log('Sheets error:', err));
   // Show success
   document.getElementById('feedback-wrap').querySelector('.feedback-header').style.display = 'none';
   document.querySelectorAll('.feedback-step').forEach(s => s.style.display = 'none');
