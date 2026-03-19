@@ -51,7 +51,7 @@
 <!-- PWA -->
 <meta name="application-name" content="DocHelper">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="DocHelper">
 <meta name="theme-color" content="#111111">
 <meta name="description" content="Документы для жизни в ЕС">
@@ -1674,7 +1674,21 @@
   </div>
 </section>
 
-<!-- MODAL BACKDROP -->
+<!-- APK DOWNLOAD SECTION -->
+<section style="background:var(--card-bg);border-top:1px solid var(--border);padding:2rem 1rem;text-align:center;">
+  <div style="max-width:500px;margin:0 auto;">
+    <div style="font-size:2rem;margin-bottom:0.75rem;">📱</div>
+    <h3 style="font-family:'Playfair Display',serif;color:var(--text);margin-bottom:0.5rem;" id="apk-title">Додаток для Android</h3>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.25rem;" id="apk-desc">Встановіть DocHelper як додаток на свій телефон — працює без браузера</p>
+    <a href="https://github.com/Sixshot1968/dochelper-eu/releases/download/v1.0/Dochelper.apk"
+       style="display:inline-flex;align-items:center;gap:0.5rem;padding:0.75rem 1.75rem;background:var(--gold);color:#111;text-decoration:none;border-radius:8px;font-weight:700;font-size:0.95rem;transition:opacity 0.2s;"
+       onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'"
+       download>
+      ⬇️ <span id="apk-btn">Завантажити APK (4 MB)</span>
+    </a>
+    <p style="color:var(--text-muted);font-size:0.75rem;margin-top:0.75rem;" id="apk-note">⚠️ При встановленні дозвольте "Невідомі джерела" в налаштуваннях Android</p>
+  </div>
+</section>
 <div class="modal-backdrop" id="backdrop" onclick="closeModal(event)">
   <div class="modal" id="modal">
     <div id="modal-content"></div>
@@ -4303,6 +4317,15 @@ function setLang(lang) {
   if (artNote) artNote.textContent = lang === 'uk' ? '💡 Статті носять інформаційний характер. Нюансів багато — завжди уточнюйте у соцпрацівника.' : '💡 Статьи носят информационный характер. Нюансов много — всегда уточняйте у соцработника.';
   // Update page title
   document.title = lang === 'uk' ? 'DocHelper — Документи для життя в ЄС' : 'DocHelper — Документы для жизни в ЕС';
+  // Update APK section
+  const apkTitle = document.getElementById('apk-title');
+  const apkDesc = document.getElementById('apk-desc');
+  const apkBtn = document.getElementById('apk-btn');
+  const apkNote = document.getElementById('apk-note');
+  if (apkTitle) apkTitle.textContent = lang === 'uk' ? 'Додаток для Android' : 'Приложение для Android';
+  if (apkDesc) apkDesc.textContent = lang === 'uk' ? 'Встановіть DocHelper як додаток на свій телефон — працює без браузера' : 'Установите DocHelper как приложение на телефон — работает без браузера';
+  if (apkBtn) apkBtn.textContent = lang === 'uk' ? 'Завантажити APK (4 MB)' : 'Скачать APK (4 MB)';
+  if (apkNote) apkNote.textContent = lang === 'uk' ? '⚠️ При встановленні дозвольте "Невідомі джерела" в налаштуваннях Android' : '⚠️ При установке разрешите "Неизвестные источники" в настройках Android';
 }
 </script>
 
